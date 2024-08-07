@@ -10,11 +10,16 @@
 <body>
     <div class="container">
         <h1>Typing Test</h1>
+        <div class="slider-container">
+            <label for="wordCountSlider">Number of Words: <span id="wordCountValue">10</span></label>
+            <input type="range" id="wordCountSlider" min="5" max="50" value="10" step="1">
+        </div>
         <div id="quoteDisplay" class="quote-display"></div>
         <textarea id="quoteInput" class="quote-input" placeholder="Start typing..."></textarea>
         <div class="stats">
             <span id="timer">Time: 0s</span>
             <span id="accuracy">Accuracy: 0%</span>
+            <span id="wpm">WPM: 0</span>
         </div>
     </div>
     <script src="script.js"></script>

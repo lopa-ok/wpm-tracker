@@ -2,19 +2,30 @@ const quoteDisplayElement = document.getElementById('quoteDisplay');
 const quoteInputElement = document.getElementById('quoteInput');
 const timerElement = document.getElementById('timer');
 const accuracyElement = document.getElementById('accuracy');
+const wpmElement = document.getElementById('wpm');
+const wordCountSlider = document.getElementById('wordCountSlider');
+const wordCountValue = document.getElementById('wordCountValue');
 
 let startTime;
 let correctChars = 0;
 let totalCharsTyped = 0;
+let totalWordsTyped = 0;
+let firstTypingTimeElapsed = false;
 
-async function fetchRandomWords(count = 10) {
+function updateWordCount() {
+    wordCountValue.innerText = wordCountSlider.value;
+    renderNewQuote();
+}
+
+async function fetchRandomWords(count) {
     const response = await fetch(`https://random-word-api.herokuapp.com/word?number=${count}`);
     const words = await response.json();
     return words.join(' ');
 }
 
 async function renderNewQuote() {
-    const quote = await fetchRandomWords(10);
+    const wordCount = parseInt(wordCountSlider.value, 10);
+    const quote = await fetchRandomWords(wordCount);
     quoteDisplayElement.innerText = '';
     quote.split('').forEach((character, index) => {
         const characterSpan = document.createElement('span');
@@ -61,17 +72,25 @@ quoteInputElement.addEventListener('input', () => {
 
     // Check if the user has completed the quote
     if (arrayValue.length === arrayQuote.length && correct) {
+        totalWordsTyped += parseInt(wordCountSlider.value, 10);
         renderNewQuote();
     }
 
     updateAccuracy();
+    updateWPM();
 });
 
 function startTimer() {
     timerElement.innerText = 'Time: 0s';
     startTime = new Date();
     setInterval(() => {
-        timerElement.innerText = `Time: ${Math.floor((new Date() - startTime) / 1000)}s`;
+        const elapsedSeconds = Math.floor((new Date() - startTime) / 1000);
+        timerElement.innerText = `Time: ${elapsedSeconds}s`;
+        if (elapsedSeconds <= 5 && !firstTypingTimeElapsed) {
+            updateEstimatedWPM();
+        } else if (elapsedSeconds > 5) {
+            firstTypingTimeElapsed = true;
+        }
     }, 1000);
 }
 
@@ -80,7 +99,25 @@ function updateAccuracy() {
     accuracyElement.innerText = `Accuracy: ${accuracy}%`;
 }
 
+function updateWPM() {
+    const elapsedMinutes = (new Date() - startTime) / 60000;
+    const wpm = Math.floor(totalWordsTyped / elapsedMinutes);
+    wpmElement.innerText = `WPM: ${wpm}`;
+}
+
+function updateEstimatedWPM() {
+    const elapsedSeconds = Math.floor((new Date() - startTime) / 1000);
+    if (elapsedSeconds > 0) {
+        const estimatedWPM = Math.floor((totalWordsTyped / elapsedSeconds) * 60);
+        wpmElement.innerText = `Estimated WPM: ${estimatedWPM}`;
+    }
+}
+
+
 renderNewQuote();
+
+
+wordCountSlider.addEventListener('input', updateWordCount);
 
 
 document.addEventListener('click', () => {

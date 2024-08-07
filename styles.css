@@ -12,6 +12,14 @@ body {
     text-align: center;
 }
 
+.slider-container {
+    margin-bottom: 20px;
+}
+
+#wordCountSlider {
+    width: 300px;
+}
+
 .quote-display {
     margin-bottom: 20px;
     font-size: 24px;
@@ -20,6 +28,7 @@ body {
     background-color: #fff;
     display: flex;
     flex-wrap: wrap;
+    white-space: pre-wrap; /* Ensure spaces are preserved */
 }
 
 .quote-input {
@@ -53,4 +62,3 @@ body {
     50% { border-color: transparent; }
     100% { border-color: black; }
 }
-
