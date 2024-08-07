@@ -5,12 +5,17 @@ const accuracyElement = document.getElementById('accuracy');
 const wpmElement = document.getElementById('wpm');
 const wordCountSlider = document.getElementById('wordCountSlider');
 const wordCountValue = document.getElementById('wordCountValue');
+const timedModeButton = document.getElementById('timedMode');
+const freeTypingModeButton = document.getElementById('freeTypingMode');
 
 let startTime;
+let timerInterval;
+let mode = 'free';
 let correctChars = 0;
 let totalCharsTyped = 0;
 let totalWordsTyped = 0;
-let firstTypingTimeElapsed = false;
+let elapsedTime = 0;
+const timedModeDuration = 60;
 
 function updateWordCount() {
     wordCountValue.innerText = wordCountSlider.value;
@@ -83,15 +88,24 @@ quoteInputElement.addEventListener('input', () => {
 function startTimer() {
     timerElement.innerText = 'Time: 0s';
     startTime = new Date();
-    setInterval(() => {
-        const elapsedSeconds = Math.floor((new Date() - startTime) / 1000);
-        timerElement.innerText = `Time: ${elapsedSeconds}s`;
-        if (elapsedSeconds <= 5 && !firstTypingTimeElapsed) {
-            updateEstimatedWPM();
-        } else if (elapsedSeconds > 5) {
-            firstTypingTimeElapsed = true;
-        }
-    }, 1000);
+    elapsedTime = 0;
+    if (mode === 'timed') {
+        timerInterval = setInterval(() => {
+            elapsedTime = Math.floor((new Date() - startTime) / 1000);
+            timerElement.innerText = `Time: ${elapsedTime}s`;
+            if (elapsedTime >= timedModeDuration) {
+                clearInterval(timerInterval);
+                renderNewQuote();
+            }
+            updateWPM();
+        }, 1000);
+    } else {
+        timerInterval = setInterval(() => {
+            const elapsedSeconds = Math.floor((new Date() - startTime) / 1000);
+            timerElement.innerText = `Time: ${elapsedSeconds}s`;
+            updateWPM();
+        }, 1000);
+    }
 }
 
 function updateAccuracy() {
@@ -102,16 +116,32 @@ function updateAccuracy() {
 function updateWPM() {
     const elapsedMinutes = (new Date() - startTime) / 60000;
     const wpm = Math.floor(totalWordsTyped / elapsedMinutes);
-    wpmElement.innerText = `WPM: ${wpm}`;
-}
-
-function updateEstimatedWPM() {
-    const elapsedSeconds = Math.floor((new Date() - startTime) / 1000);
-    if (elapsedSeconds > 0) {
-        const estimatedWPM = Math.floor((totalWordsTyped / elapsedSeconds) * 60);
+    if (mode === 'timed' && elapsedTime <= timedModeDuration) {
+        const estimatedWPM = Math.floor((totalWordsTyped / elapsedTime) * 60);
         wpmElement.innerText = `Estimated WPM: ${estimatedWPM}`;
+    } else {
+        wpmElement.innerText = `WPM: ${wpm}`;
     }
 }
+
+function switchMode(newMode) {
+    mode = newMode;
+    startTime = new Date();
+    totalCharsTyped = 0;
+    totalWordsTyped = 0;
+    correctChars = 0;
+    clearInterval(timerInterval);
+    if (mode === 'timed') {
+        timerElement.innerText = `Time: 0s`;
+    } else {
+        renderNewQuote();
+    }
+    timedModeButton.classList.toggle('active', mode === 'timed');
+    freeTypingModeButton.classList.toggle('active', mode === 'free');
+}
+
+timedModeButton.addEventListener('click', () => switchMode('timed'));
+freeTypingModeButton.addEventListener('click', () => switchMode('free'));
 
 
 renderNewQuote();

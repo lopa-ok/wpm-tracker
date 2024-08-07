@@ -62,3 +62,23 @@ body {
     50% { border-color: transparent; }
     100% { border-color: black; }
 }
+.mode-selection {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.mode-selection button {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 16px;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+.mode-selection button.active {
+    background-color: #45a049;
+}
